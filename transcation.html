@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinSync - Transactions</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles for appearance */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+            /* Light gray background */
+        }
+
+        .summary-card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .table-header-cell {
+            color: #555;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+    <!-- Header/Navigation Bar -->
+    <header class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="text-2xl font-extrabold text-purple-700">FinSync</div>
+            <nav class="flex space-x-6 text-gray-600 font-medium">
+                <a href="#" class="text-purple-700 font-bold border-b-2 border-purple-700 pb-1">Transactions</a>
+                <a href="#" class="hover:text-purple-600">Settings</a>
+            </nav>
+            <!-- Removed the "Local Storage User" profile area to simplify the UI -->
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Title and Add Button -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-800">Your Transactions</h1>
+                <p class="text-gray-500 mt-1">Add, view, and manage your daily income and expenses.</p>
+            </div>
+            <button id="open-modal-btn"
+                class="flex items-center bg-purple-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:bg-purple-700 transition duration-150">
+                <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                Add Transaction
+            </button>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Total Balance Card -->
+            <div class="summary-card bg-white p-6 rounded-xl border-t-4 border-purple-500">
+                <p class="text-sm font-medium text-gray-500">Total Balance</p>
+                <p id="total-balance" class="text-3xl font-bold text-purple-700 mt-1">₹0.00</p>
+            </div>
+            <!-- Income (Month) Card -->
+            <div class="summary-card bg-white p-6 rounded-xl border-t-4 border-green-500">
+                <p class="text-sm font-medium text-gray-500">Income (Month)</p>
+                <p id="monthly-income" class="text-3xl font-bold text-green-600 mt-1">₹0.00</p>
+            </div>
+            <!-- Expenses (Month) Card -->
+            <div class="summary-card bg-white p-6 rounded-xl border-t-4 border-red-500">
+                <p class="text-sm font-medium text-gray-500">Expenses (Month)</p>
+                <p id="monthly-expenses" class="text-3xl font-bold text-red-600 mt-1">₹0.00</p>
+            </div>
+            <!-- Net Savings (Month) Card -->
+            <div class="summary-card bg-white p-6 rounded-xl border-t-4 border-yellow-500">
+                <p class="text-sm font-medium text-gray-500">Net Savings (Month)</p>
+                <p id="net-savings" class="text-3xl font-bold text-yellow-600 mt-1">₹0.00</p>
+            </div>
+        </div>
+
+        <!-- Transactions and Breakdown Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Recent Transactions Table (2/3 width) -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Recent Transactions</h2>
+
+                <!-- Controls -->
+                <div class="flex items-center space-x-4 mb-4">
+                    <div class="relative flex-grow">
+                        <i data-lucide="search"
+                            class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="search-input" placeholder="Search by category or notes..."
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                    <select id="sort-select"
+                        class="w-48 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                        <option value="date-desc">Sort by Date (Newest)</option>
+                        <option value="date-asc">Sort by Date (Oldest)</option>
+                        <option value="amount-desc">Sort by Amount (High)</option>
+                        <option value="amount-asc">Sort by Amount (Low)</option>
+                    </select>
+                </div>
+
+                <!-- Transaction Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th class="table-header-cell w-[100px]">DATE</th>
+                                <th class="table-header-cell w-[80px]">TYPE</th>
+                                <th class="table-header-cell w-[120px]">CATEGORY</th>
+                                <th class="table-header-cell w-[120px]">AMOUNT (₹)</th>
+                                <th class="table-header-cell">NOTES</th>
+                                <th class="table-header-cell w-[100px] text-center">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Transaction rows will be inserted here by JavaScript -->
+                            <tr>
+                                <td colspan="6" class="p-4 text-center text-gray-500 italic">No transactions recorded
+                                    yet. Add one!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <!-- Expense Breakdown (1/3 width) -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Expense Breakdown (Current Month)</h2>
+                <div id="breakdown-list" class="space-y-3">
+                    <p class="text-gray-500 italic">No expenses recorded this month.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+
+    <!-- Add Transaction Modal (Hidden by default) -->
+    <div id="transaction-modal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center p-4 z-50 transition-opacity duration-300"
+        aria-modal="true" role="dialog">
+        <div
+            class="bg-white rounded-xl w-full max-w-lg shadow-2xl transform scale-100 transition-transform duration-300">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h3 class="text-2xl font-semibold text-gray-800">Add New Transaction</h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <form id="transaction-form" class="p-6 space-y-4">
+
+                <div>
+                    <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select id="type" name="type" required
+                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-purple-500 focus:border-purple-500">
+                        <option value="Expense">Expense</option>
+                        <option value="Income">Income</option>
+                    </select>
+                </div>
+
+                <div class="flex space-x-4">
+                    <div class="w-1/2">
+                        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" id="date" name="date" required
+                            class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                    <div class="w-1/2">
+                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Amount (₹)</label>
+                        <input type="number" id="amount" name="amount" required min="0.01" step="0.01"
+                            class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-purple-500 focus:border-purple-500"
+                            placeholder="e.g., 50.00">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <input type="text" id="category" name="category" required
+                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-purple-500 focus:border-purple-500"
+                        placeholder="e.g., Food, Salary, Rent">
+                </div>
+
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+                    <textarea id="notes" name="notes" rows="2"
+                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-purple-500 focus:border-purple-500"
+                        placeholder="Description of the transaction..."></textarea>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <button type="button" id="cancel-modal-btn"
+                        class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 mr-3 transition duration-150">Cancel</button>
+                    <button type="submit"
+                        class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition duration-150">Save
+                        Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // --- GLOBAL STATE & INITIALIZATION ---
+        // This application uses only local storage and requires no connection to a user profile or external database.
+        const LOCAL_STORAGE_KEY = 'finsic_transactions';
+        let transactions = []; // Main array to hold all transaction objects
+
+        // DOM Elements
+        const transactionForm = document.getElementById('transaction-form');
+        const tableBody = document.getElementById('transactions-table-body');
+        const modal = document.getElementById('transaction-modal');
+        const searchInput = document.getElementById('search-input');
+        const sortSelect = document.getElementById('sort-select');
+
+        // Helper to generate a unique ID
+        const generateId = () => Date.now().toString(36) + Math.random().toString(36).substring(2);
+
+        // --- LOCAL STORAGE UTILITIES ---
+
+        /**
+         * Loads transactions from local storage, or initializes an empty array.
+         */
+        const loadTransactions = () => {
+            const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (storedData) {
+                transactions = JSON.parse(storedData);
+            } else {
+                transactions = [];
+            }
+            // Ensure data integrity by sorting by date on load
+            sortTransactions();
+        };
+
+        /**
+         * Saves the current transactions array to local storage.
+         */
+        const saveTransactions = () => {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(transactions));
+        };
+
+        // --- DASHBOARD CALCULATIONS ---
+
+        /**
+         * Calculates and updates all summary cards.
+         */
+        const updateDashboard = () => {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+
+            let totalBalance = 0;
+            let monthlyIncome = 0;
+            let monthlyExpenses = 0;
+            let expenseBreakdown = {};
+
+            transactions.forEach(t => {
+                const amount = parseFloat(t.amount);
+
+                // 1. Calculate Total Balance (all time)
+                if (t.type === 'Income') {
+                    totalBalance += amount;
+                } else {
+                    totalBalance -= amount;
+                }
+
+                // 2. Check if transaction is in the current month
+                const tDate = new Date(t.date);
+                if (tDate.getFullYear() === currentYear && tDate.getMonth() === currentMonth) {
+                    if (t.type === 'Income') {
+                        monthlyIncome += amount;
+                    } else {
+                        monthlyExpenses += amount;
+
+                        // 3. Track expense breakdown
+                        const category = t.category.toLowerCase().trim() || 'Uncategorized';
+                        expenseBreakdown[category] = (expenseBreakdown[category] || 0) + amount;
+                    }
+                }
+            });
+
+            const netSavings = monthlyIncome - monthlyExpenses;
+
+            // Update DOM
+            document.getElementById('total-balance').textContent = formatCurrency(totalBalance);
+            document.getElementById('monthly-income').textContent = formatCurrency(monthlyIncome, 'green');
+            document.getElementById('monthly-expenses').textContent = formatCurrency(monthlyExpenses, 'red');
+            document.getElementById('net-savings').textContent = formatCurrency(netSavings, netSavings >= 0 ? 'yellow' : 'red');
+
+            updateExpenseBreakdown(expenseBreakdown, monthlyExpenses);
+        };
+
+        /**
+         * Renders the expense breakdown list.
+         * @param {Object} breakdown - Category to total expense map.
+         * @param {number} totalMonthlyExpense - Total expenses for the month.
+         */
+        const updateExpenseBreakdown = (breakdown, totalMonthlyExpense) => {
+            const breakdownList = document.getElementById('breakdown-list');
+            breakdownList.innerHTML = '';
+
+            const categories = Object.keys(breakdown);
+            if (categories.length === 0) {
+                breakdownList.innerHTML = '<p class="text-gray-500 italic">No expenses recorded this month.</p>';
+                return;
+            }
+
+            // Sort breakdown by amount descending
+            categories.sort((a, b) => breakdown[b] - breakdown[a]);
+
+            categories.forEach(category => {
+                const amount = breakdown[category];
+                const percentage = totalMonthlyExpense > 0 ? (amount / totalMonthlyExpense) * 100 : 0;
+
+                const item = document.createElement('div');
+                item.className = 'flex flex-col space-y-1';
+                item.innerHTML = `
+                    <div class="flex justify-between text-sm font-medium text-gray-700 capitalize">
+                        <span>${category}</span>
+                        <span>${formatCurrency(amount)} (${percentage.toFixed(0)}%)</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="h-2 rounded-full bg-red-400" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                breakdownList.appendChild(item);
+            });
+        };
+
+        // --- TRANSACTION TABLE RENDERING ---
+
+        /**
+         * Renders the filtered/sorted transactions to the table.
+         * @param {Array} filteredTxs - The array of transactions to display.
+         */
+        const renderTransactions = (filteredTxs = transactions) => {
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            if (filteredTxs.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500 italic">No transactions found.</td></tr>';
+                return;
+            }
+
+            filteredTxs.forEach(t => {
+                const isExpense = t.type === 'Expense';
+                const amountClass = isExpense ? 'text-red-500 font-medium' : 'text-green-500 font-medium';
+                const typeClass = isExpense ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
+
+                const row = tableBody.insertRow();
+                row.className = 'hover:bg-gray-50 transition duration-100';
+
+                row.innerHTML = `
+                    <td class="p-4 text-sm text-gray-500">${formatDate(t.date)}</td>
+                    <td class="p-4 text-sm"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${typeClass}">${t.type}</span></td>
+                    <td class="p-4 text-sm text-gray-600 capitalize">${t.category}</td>
+                    <td class="p-4 text-sm ${amountClass}">${isExpense ? '-' : ''} ${formatCurrency(t.amount).replace('₹', '')} ₹</td>
+                    <td class="p-4 text-sm text-gray-500 truncate max-w-xs">${t.notes || '-'}</td>
+                    <td class="p-4 text-sm text-center">
+                        <button onclick="deleteTransaction('${t.id}')" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition duration-150" title="Delete Transaction">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+            });
+            // Re-initialize lucide icons for the newly created trash buttons
+            lucide.createIcons();
+        };
+
+        // --- DATA MANIPULATION & ACTIONS ---
+
+        /**
+         * Deletes a transaction by its ID.
+         * @param {string} id - The unique ID of the transaction to delete.
+         */
+        window.deleteTransaction = (id) => {
+            // Confirmation modal alternative
+            // NOTE: Using window.confirm() here as a quick substitute for a custom UI modal
+            if (window.confirm('Are you sure you want to delete this transaction?')) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveTransactions();
+                applyFiltersAndSort(); // Re-render and update totals
+            }
+        };
+
+        /**
+         * Sorts the global transactions array based on the selected criteria.
+         */
+        const sortTransactions = () => {
+            const sortValue = sortSelect.value;
+            const [key, order] = sortValue.split('-');
+
+            transactions.sort((a, b) => {
+                let valA = a[key];
+                let valB = b[key];
+
+                if (key === 'date') {
+                    valA = new Date(valA).getTime();
+                    valB = new Date(valB).getTime();
+                } else if (key === 'amount') {
+                    valA = parseFloat(valA);
+                    valB = parseFloat(valB);
+                }
+
+                if (valA < valB) return order === 'asc' ? -1 : 1;
+                if (valA > valB) return order === 'asc' ? 1 : -1;
+                return 0;
+            });
+        };
+
+        /**
+         * Applies the search filter and sorting, then triggers rendering and dashboard update.
+         */
+        const applyFiltersAndSort = () => {
+            sortTransactions();
+
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let filteredTxs = transactions;
+
+            if (searchTerm) {
+                filteredTxs = transactions.filter(t =>
+                    t.category.toLowerCase().includes(searchTerm) ||
+                    t.notes.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            renderTransactions(filteredTxs);
+            updateDashboard();
+        };
+
+        // --- EVENT HANDLERS ---
+
+        // Form submission handler
+        transactionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const newTransaction = {
+                id: generateId(),
+                date: formData.get('date'),
+                type: formData.get('type'),
+                amount: parseFloat(formData.get('amount')).toFixed(2),
+                category: formData.get('category').trim(),
+                notes: formData.get('notes').trim(),
+                timestamp: Date.now() // for easy sorting
+            };
+
+            transactions.push(newTransaction);
+            saveTransactions();
+
+            // Re-render the list and update totals
+            applyFiltersAndSort();
+
+            // Close and reset modal
+            closeModal();
+            transactionForm.reset();
+        });
+
+        // Search and Sort events
+        searchInput.addEventListener('input', applyFiltersAndSort);
+        sortSelect.addEventListener('change', applyFiltersAndSort);
+
+
+        // --- MODAL LOGIC ---
+
+        const openModal = () => {
+            // Set default date to today
+            document.getElementById('date').value = new Date().toISOString().substring(0, 10);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        const closeModal = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        document.getElementById('open-modal-btn').addEventListener('click', openModal);
+        document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+        document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
+
+        // Close modal on outside click (optional)
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+
+        // --- FORMATTING HELPERS ---
+
+        /**
+         * Formats a number to currency string (₹X.XX).
+         * @param {number} amount - The numeric amount.
+         * @param {string} color - Optional color hint (green, red, yellow).
+         */
+        const formatCurrency = (amount, color = 'purple') => {
+            // Use the Indian Rupee symbol and locale for formatting
+            const formatter = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 2,
+            });
+            // The formatter might return the currency code; we ensure the correct symbol is used.
+            return formatter.format(amount).replace('INR', '₹');
+        };
+
+        /**
+         * Formats a date string (YYYY-MM-DD) to a short display string (DD/MM/YYYY).
+         * @param {string} dateString - The date string.
+         */
+        const formatDate = (dateString) => {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+        };
+
+
+        // --- INITIAL PAGE LOAD ---
+
+        // Load data, apply filters/sorting, and update dashboard on page load
+        window.onload = () => {
+            loadTransactions();
+            applyFiltersAndSort();
+        };
+
+    </script>
+    <!--chatbot-->
+    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+    <script type="module">
+        import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+        createChat({
+            webhookUrl: 'https://erah07.app.n8n.cloud/webhook/8a88def7-84a7-4fa4-8fd0-3d27ecf59bc2/chat',
+            webhookConfig: {
+                method: 'POST',
+                headers: {}
+            },
+            target: '#n8n-chat',
+            mode: 'window',
+            chatInputKey: 'chatInput',
+            chatSessionKey: 'sessionId',
+            loadPreviousSession: true,
+            metadata: {},
+            showWelcomeScreen: false,
+            defaultLanguage: 'en',
+            initialMessages: [
+                'Hi there! 👋',
+                'My name is AIVA. How can I assist you today?'
+            ],
+            i18n: {
+                en: {
+                    title: 'Hi there! 👋',
+                    subtitle: "Start a chat. We're here to help you 24/7.",
+                    footer: '',
+                    getStarted: 'New Conversation',
+                    inputPlaceholder: 'Type your question..',
+                },
+            },
+            enableStreaming: false,
+        });
+    </script>
+</body>
+
+</html>

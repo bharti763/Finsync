@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login / Signup Page</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Montserrat', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(110deg, #e9e789 0%, #993eea 60%, #d28be0 100%);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 48px auto;
+      display: flex;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 2px 36px rgba(92,22,128,0.13);
+      background: transparent;
+      min-height: 650px;
+    }
+    .side-panel {
+      background: #9333ea;
+      flex: 1.1;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 56px 32px;
+    }
+    .side-panel h1 {
+      font-size: 2.7rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      margin-top: 0;
+    }
+    .side-panel p {
+      font-size: 1.25rem;
+      font-weight: 500;
+      margin-top: 0;
+      margin-bottom: 36px;
+      text-align: center;
+    }
+    .logo {
+      margin-top: 16px;
+      width: 92px;
+      height: 92px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo svg {
+      width: 78px;
+      height: 78px;
+    }
+    .right-panel {
+      background: #fff;
+      flex: 1.8;
+      padding: 56px 54px 30px 54px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      min-width: 450px;
+    }
+    @media (max-width: 900px) {
+      .container { flex-direction: column; max-width: 99vw; margin: 3vw auto; }
+      .side-panel, .right-panel { min-width: 100%; border-radius: 0; padding: 28px 12px; }
+    }
+    .tabs {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+      width: 100%;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: 8px 24px 8px 6px;
+      cursor: pointer;
+      color: #9333ea;
+      border-bottom: 3px solid transparent;
+      transition: border-bottom 0.13s, color 0.14s;
+    }
+    .tab-btn.active {
+      border-bottom: 3px solid #9333ea;
+      color: #800aa9;
+    }
+    .form-title {
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: #800aa9;
+      margin-top: 12px;
+      margin-bottom: 7px;
+      letter-spacing: 1px;
+    }
+    .form-sub {
+      font-size: 1.12rem;
+      color: #757575;
+      margin-bottom: 35px;
+      font-weight: 500;
+    }
+    form { width: 100%; }
+    .form-group { 
+      margin-bottom: 22px; 
+      width: 100%;
+    }
+    .form-group label {
+      display: block;
+      font-size: 1.12rem;
+      margin-bottom: 8px;
+      color: #353353;
+      font-weight: 500;
+    }
+    .form-group input {
+      padding: 15px 15px;
+      font-size: 1.18rem;
+      width: 100%;
+      border: 1px solid #eee;
+      background: #f8f8fb;
+      border-radius: 12px;
+      font-family: inherit;
+      outline: none;
+      margin-bottom: 0;
+      transition: border 0.19s;
+    }
+    .form-group input:focus {
+      border-color: #a952d3;
+      background: #fff;
+    }
+    .forgot-box {
+      margin-bottom: 21px;
+      margin-top: -8px;
+    }
+    .forgot-box a {
+      text-decoration: none;
+      color: #9797b9;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: color 0.18s;
+    }
+    .forgot-box a:hover {
+      color: #9333ea;
+    }
+    .btn-main {
+      width: 100%;
+      padding: 16px 0;
+      background: #9333ea;
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.34rem;
+      font-weight: 700;
+      margin-bottom: 26px;
+      margin-top: 10px;
+      cursor: pointer;
+      box-shadow: 0 5px 18px rgba(92,22,128,0.10);
+      transition: background .14s, transform .14s;
+    }
+    .btn-main:active {
+      background: #800aa9;
+      transform: scale(0.98);
+    }
+    .error {
+      color: #e74c3c;
+      font-size: 1.01rem;
+      font-weight: 500;
+      margin-bottom: 17px;
+      margin-top: -3px;
+    }
+    .signup-link, .login-link {
+      width: 100%;
+      text-align: center;
+      font-size: 1.14rem;
+      color: #68686b;
+      font-weight: 500;
+    }
+    .signup-link a, .login-link a {
+      color: #9333ea;
+      text-decoration: none;
+      font-weight: 700;
+      transition: color 0.17s;
+    }
+    .signup-link a:hover, .login-link a:hover {
+      text-decoration: underline;
+      color: #800aa9;
+    }
+    @media (max-width: 530px) {
+      .right-panel { padding: 26px 7vw; min-width: 0; }
+      .side-panel { padding: 20px 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="side-panel">
+      <h1>FinSync</h1>
+      <p>Simplify your finances.</p>
+      <div class="logo">
+        <svg viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="30" fill="none" stroke="#e9e789" stroke-width="4"/>
+          <path d="M23 44c0-6 18-6 18 0" stroke="#e9e789" stroke-width="4" fill="none"/>
+          <circle cx="32" cy="32" r="12" fill="none" stroke="#e9e789" stroke-width="4"/>
+          <circle cx="32" cy="32" r="4" fill="#e9e789"/>
+        </svg>
+      </div>
+    </div>
+    <div class="right-panel">
+      <div class="tabs">
+        <button class="tab-btn active" id="loginTab">Login</button>
+        <button class="tab-btn" id="signupTab">Signup</button>
+      </div>
+      <!-- Login Form -->
+      <div id="loginArea">
+        <div class="form-title">
+          Welcome Back <span class="emoji">👋</span>
+        </div>
+        <div class="form-sub">
+          Log in to manage your finances.
+        </div>
+        <form id="loginForm" autocomplete="off">
+          <div class="error" id="loginError"></div>
+          <div class="form-group">
+            <label for="loginEmail">Email Address</label>
+            <input type="email" id="loginEmail" name="loginEmail" autocomplete="username" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" name="loginPassword" autocomplete="current-password" required>
+          </div>
+          <div class="forgot-box">
+            <a href="#">Forgot Password?</a>
+          </div>
+          <button type="submit" class="btn-main">Login</button>
+        </form>
+        <div class="signup-link">
+          Don't have an account? <a href="#" id="showSignup">Create one</a>
+        </div>
+      </div>
+      <!-- Signup Form -->
+      <div id="signupArea" style="display:none;">
+        <div class="form-title">
+          Create Account <span class="emoji">✨</span>
+        </div>
+        <div class="form-sub">
+          Signup and start managing your finances.
+        </div>
+        <form id="signupForm" autocomplete="off">
+          <div class="error" id="signupError"></div>
+          <div class="form-group">
+            <label for="signupEmail">Email Address</label>
+            <input type="email" id="signupEmail" name="signupEmail" autocomplete="username" required>
+          </div>
+          <div class="form-group">
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword" name="signupPassword" autocomplete="new-password" required>
+          </div>
+          <div class="form-group">
+            <label for="signupConfirm">Confirm Password</label>
+            <input type="password" id="signupConfirm" name="signupConfirm" autocomplete="new-password" required>
+          </div>
+          <button type="submit" class="btn-main">Signup</button>
+        </form>
+        <div class="login-link">
+          Already have an account? <a href="#" id="showLogin">Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const loginTab = document.getElementById('loginTab');
+    const signupTab = document.getElementById('signupTab');
+    const loginArea = document.getElementById('loginArea');
+    const signupArea = document.getElementById('signupArea');
+    // Tab toggling
+    loginTab.onclick = function() {
+      loginTab.classList.add('active');
+      signupTab.classList.remove('active');
+      loginArea.style.display = '';
+      signupArea.style.display = 'none';
+    };
+    signupTab.onclick = function() {
+      signupTab.classList.add('active');
+      loginTab.classList.remove('active');
+      signupArea.style.display = '';
+      loginArea.style.display = 'none';
+    };
+    document.getElementById('showSignup').onclick = function(e) {
+      e.preventDefault();
+      signupTab.click();
+    };
+    document.getElementById('showLogin').onclick = function(e) {
+      e.preventDefault();
+      loginTab.click();
+    };
+
+    // Login validation and redirect
+    document.getElementById('loginForm').onsubmit = function(e) {
+      e.preventDefault();
+      var email = document.getElementById('loginEmail').value.trim();
+      var pass = document.getElementById('loginPassword').value.trim();
+      var error = document.getElementById('loginError');
+      error.textContent = '';
+      if (!email || !pass) {
+        error.textContent = 'Both fields are required.';
+        return;
+      }
+      window.location.href = "file:///C:/Users/VICTUS/home%20page/homepage.html";
+    };
+
+    // Signup validation and switch to login tab
+    document.getElementById('signupForm').onsubmit = function(e) {
+      e.preventDefault();
+      var email = document.getElementById('signupEmail').value.trim();
+      var pass = document.getElementById('signupPassword').value.trim();
+      var confirm = document.getElementById('signupConfirm').value.trim();
+      var error = document.getElementById('signupError');
+      error.textContent = '';
+      if (!email || !pass || !confirm) {
+        error.textContent = 'All fields are required.';
+        return;
+      }
+      if (pass !== confirm) {
+        error.textContent = 'Passwords do not match.';
+        return;
+      }
+      // After successful signup, switch to login form
+      loginTab.click(); // Switch tab
+      // Optionally show a message
+      document.getElementById('loginError').textContent = 'Signup successful! Please login.';
+    };
+  </script>
+  </script>
+
+   <!--chatbot-->
+    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+    <script type="module">
+        import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+        createChat({
+            webhookUrl: 'https://erah07.app.n8n.cloud/webhook/8a88def7-84a7-4fa4-8fd0-3d27ecf59bc2/chat',
+            webhookConfig: {
+                method: 'POST',
+                headers: {}
+            },
+            target: '#n8n-chat',
+            mode: 'window',
+            chatInputKey: 'chatInput',
+            chatSessionKey: 'sessionId',
+            loadPreviousSession: true,
+            metadata: {},
+            showWelcomeScreen: false,
+            defaultLanguage: 'en',
+            initialMessages: [
+                'Hi there! 👋',
+                'My name is AIVA. How can I assist you today?'
+            ],
+            i18n: {
+                en: {
+                    title: 'Hi there! 👋',
+                    subtitle: "Start a chat. We're here to help you 24/7.",
+                    footer: '',
+                    getStarted: 'New Conversation',
+                    inputPlaceholder: 'Type your question..',
+                },
+            },
+            enableStreaming: false,
+        });
+    </script>
+</body>
+</html>
